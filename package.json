@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/aria-query": "^5.0.1",
     "axios": "^1.4.0",
+    "lodash": "^4.17.21",
     "modern-normalize": "^1.1.0",
     "nanoid": "^4.0.1",
     "react": "^18.1.0",
