@@ -1,10 +1,16 @@
 //contactSlice.js
-import { createSlice, createAction } from '@reduxjs/toolkit';
+import { createSlice, createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const addContact = createAction('contacts/addContact');
 export const deleteContact = createAction('contacts/deleteContact');
 export const setFilter = createAction('contacts/setFilter');
 export const initializeContacts = createAction('contacts/initializeContacts');
+
+export const fetchContacts = createAsyncThunk('contacts/fetchContacts', async () => {
+  const response = await fetch('https://644bb9ef4bdbc0cc3a98d0ff.mockapi.io/contacts');
+  const data = await response.json();
+  return data;
+});
 
 export const contactSlice = createSlice({
   name: 'contacts',
@@ -23,11 +29,8 @@ export const contactSlice = createSlice({
     [setFilter]: (state, action) => {
       state.filter = action.payload;
     },
-    [initializeContacts]: state => {
-      const savedContacts = JSON.parse(localStorage.getItem('contacts'));
-      if (savedContacts) {
-        state.items = savedContacts;
-      }
+    [fetchContacts.fulfilled]: (state, action) => {
+      state.items = action.payload;
     },
   },
 });

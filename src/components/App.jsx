@@ -6,6 +6,7 @@ import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 import styles from './app.module.css';
 import { addContact, deleteContact, setFilter, initializeContacts } from '../redux/contactSlice';
+// import axios from 'axios';
 
 function App() {
   const filter = useSelector(state => state.contacts.filter);
@@ -16,19 +17,41 @@ function App() {
     dispatch(initializeContacts());
   }, [dispatch]);
 
-  const handleAddContact = (name, number) => {
-    const id = nanoid();
-    dispatch(addContact({ id, name, number }));
+  const handleAddContact = async (name, number) => {
+    const existingContact = items.find(contact => contact.phone === number);
+    if (existingContact) {
+      alert(`${number} is already in the phonebook for ${existingContact.name}.`);
+      return;
+    }
 
-    const updatedContacts = [...items, { id, name, number }];
-    localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+    const id = nanoid();
+    dispatch(addContact({ id, name, phone: number }));
+
+    const response = await fetch('https://644bb9ef4bdbc0cc3a98d0ff.mockapi.io/contacts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id, name, phone: number }),
+    });
+
+    const data = await response.json();
+    console.log(data);
   };
 
-  const handleDeleteContact = contactId => {
-    dispatch(deleteContact(contactId));
-
-    const updatedContacts = items.filter(contact => contact.id !== contactId);
-    localStorage.setItem('contacts', JSON.stringify(updatedContacts));
+  const handleDeleteContact = async contactId => {
+    const responsePromise = fetch(
+      `https://644bb9ef4bdbc0cc3a98d0ff.mockapi.io/contacts/${contactId}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    try {
+      await Promise.all([responsePromise]);
+      dispatch(deleteContact(contactId));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleFilterChange = e => {
